@@ -25,7 +25,8 @@ public class Intake extends SubsystemBase {
 
     private final PWMVictorSPX rollerOne;
     private final PWMVictorSPX rollerTwo;
-
+    private final PWMVictorSPX innerrollerslead;
+    private final PWMVictorSPX innerrollersfollow;
     //private final PIDController leftPID = new PIDController(0.1, 0, 0.001);
     //private final PIDController rightPID = new PIDController(leftPID.getP(), 0, leftPID.getD());
     //private final DutyCycleEncoder leftEncoder;
@@ -35,6 +36,9 @@ public class Intake extends SubsystemBase {
         rollerOne = new PWMVictorSPX(6);
         rollerTwo = new PWMVictorSPX(7);
         rollerTwo.setInverted(true);
+        innerrollerslead = new PWMVictorSPX(1);
+        innerrollerslead.setInverted(true);
+        innerrollersfollow = new PWMVictorSPX(2);
     }
     public Command runRollersEqual() {
         return runOnce(() -> {
