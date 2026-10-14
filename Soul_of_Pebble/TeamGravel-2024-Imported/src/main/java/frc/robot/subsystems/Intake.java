@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.PWM;
 //import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,6 +28,8 @@ public class Intake extends SubsystemBase {
     private final PWMVictorSPX rollerTwo;
     private final PWMVictorSPX innerrollerslead;
     private final PWMVictorSPX innerrollersfollow;
+    private final PWMVictorSPX flywheellead;
+    private final PWMVictorSPX flywheelfollow;
     //private final PIDController leftPID = new PIDController(0.1, 0, 0.001);
     //private final PIDController rightPID = new PIDController(leftPID.getP(), 0, leftPID.getD());
     //private final DutyCycleEncoder leftEncoder;
@@ -39,6 +42,10 @@ public class Intake extends SubsystemBase {
         innerrollerslead = new PWMVictorSPX(1);
         innerrollerslead.setInverted(true);
         innerrollersfollow = new PWMVictorSPX(2);
+        innerrollersfollow.setInverted(true);
+        flywheellead = new PWMVictorSPX(3);
+        flywheelfollow = new PWMVictorSPX(4);
+    
     }
     public Command runRollersEqual() {
         return runOnce(() -> {
