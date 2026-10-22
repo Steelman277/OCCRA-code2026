@@ -1,0 +1,12 @@
+pluginManagement {
+    repositories {
+        maven { url = uri("https://frcmaven.wpi.edu/artifactory/ex-gradle") }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = "2026-occra-launcher"
+
+
+
+
