@@ -95,13 +95,13 @@ public final class Constants {
     public static final boolean RIGHT_INVERTED = false;
     // Commissioning settings: verify direction, speed, and detection on the robot.
     // FEED SPEED: forward voltage, not RPM. Raise gradually for throughput; lower for jams or excessive launcher speed sag.
-    public static final double RUN_VOLTS = 2.0;
+    public static final double RUN_VOLTS = 3.0;
     // MOTOR CURRENT: stator amperes limit torque/heating. Choose for the mechanism; do not raise just to conceal a jam.
     public static final double STATOR_LIMIT_AMPS = 25.0;
     // BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits.
     public static final double SUPPLY_LIMIT_AMPS = 20.0;
     // BALL DETECTION: center sensor distance threshold in meters. Tune using actual empty-path and ball measurements.
-    public static final double TRANSPORT_THRESHOLD_METERS = 0.1;
+    public static final double TRANSPORT_THRESHOLD_METERS = 1.5;
     // BALL DETECTION: launcher sensor distance threshold in meters. Shared with uptake/launch feed where present.
     public static final double LAUNCHER_THRESHOLD_METERS = 0.1;
     // BALL DETECTION: trip below threshold minus this value; clear above threshold plus it. Increase only to reduce edge chatter.
@@ -111,7 +111,7 @@ public final class Constants {
     // CAN HEALTH: maximum accepted telemetry age. Diagnose wiring/update rates before changing; larger allows older feedback.
     public static final double MAX_SIGNAL_AGE_SECONDS = 0.10;
   
-  public static final double TRANSPORT_MIN_SIGNAL_STRENGTH = 6500;
+  public static final double TRANSPORT_MIN_SIGNAL_STRENGTH = 5000;
   }
 
   // Uptake settings.
