@@ -110,6 +110,8 @@ public final class Constants {
     public static final double MIN_SIGNAL_STRENGTH = 2500;
     // CAN HEALTH: maximum accepted telemetry age. Diagnose wiring/update rates before changing; larger allows older feedback.
     public static final double MAX_SIGNAL_AGE_SECONDS = 0.10;
+  
+  public static final double TRANSPORT_MIN_SIGNAL_STRENGTH = 6500;
   }
 
   // Uptake settings.

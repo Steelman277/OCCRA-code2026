@@ -58,7 +58,15 @@ public final class Transporter {
     boolean applied = sensor.getConfigurator().apply(config).isOK();
     boolean detected = sensor.getIsDetected().setUpdateFrequency(50).isOK();
     boolean faults = sensor.getFaultField().setUpdateFrequency(50).isOK();
-    return applied && detected && faults;
+   boolean strengthOk = true;
+
+   if (sensor == transport){
+    strengthOk = sensor.getSignalStrength()
+    .setUpdateFrequency(50)
+    .isOK();
+   }
+   
+    return applied && detected && faults && strengthOk;
   }
 
   private boolean fresh(StatusSignal<?> signal) {
@@ -72,14 +80,21 @@ public final class Transporter {
 
   public void periodic(boolean enabled, boolean intakeDeployed, boolean launchRequested, boolean launcherReady) {
     var t = transport.getIsDetected();
+    var strength = transport.getSignalStrength();
+    double signalStrength = strength.getValueAsDouble();
+    boolean strengthHealthy = fresh(strength)
+    && Double.isFinite(signalStrength)
+   && signalStrength >= 0;
+
+   boolean transportTripped = t.getValue() && strengthHealthy && signalStrength >= Constants.Transporter.TRANSPORT_MIN_SIGNAL_STRENGTH;
     var l = launcher.getIsDetected();
     var tf = transport.getFaultField();
     var lf = launcher.getFaultField();
     launcherHealthy = launcherConfigured && fresh(l) && fresh(lf) && lf.getValue() == 0;
     launcherTripped = l.getValue();
-    boolean healthy = configured && !commandFault && fresh(t) && fresh(l)
+    boolean healthy = configured && strengthHealthy && !commandFault && fresh(t) && fresh(l)
         && fresh(tf) && fresh(lf) && tf.getValue() == 0 && lf.getValue() == 0;
-    boolean running = TransporterLogic.shouldRun(enabled, healthy, intakeDeployed, t.getValue(), l.getValue());
+    boolean running = TransporterLogic.shouldRun(enabled, healthy, intakeDeployed, transportTripped, l.getValue());
     running = FeedLogic.shouldRun(launchRequested, launcherReady, running, healthy, intakeDeployed);
     double volts = running ? Constants.Transporter.RUN_VOLTS : 0;
     var leftStatus = left.setControl(leftRequest.withOutput(volts));
@@ -92,12 +107,15 @@ public final class Transporter {
     }
     SmartDashboard.putBoolean("Transporter/Enabled", enabled);
     SmartDashboard.putBoolean("Transporter/IntakeDeployed", intakeDeployed);
-    SmartDashboard.putBoolean("Transporter/TransportTripped", t.getValue());
+    SmartDashboard.putBoolean("Transporter/TransportRawTripped", t.getValue());
     SmartDashboard.putBoolean("Transporter/LauncherTripped", l.getValue());
     SmartDashboard.putBoolean("Transporter/Healthy", healthy && !commandFault);
     SmartDashboard.putBoolean("Transporter/Running", running);
     SmartDashboard.putNumber("Transporter/TransportMeters", transport.getDistance().getValueAsDouble());
     SmartDashboard.putNumber("Transporter/LauncherMeters", launcher.getDistance().getValueAsDouble());
+   // SmartDashboard.putBoolean("Transporter/TransportSignalStrength", signalStrength);
+    SmartDashboard.putBoolean("Transporter/StrengthFeedbackHealthy", strengthHealthy);
+ 
   }
 
   public void stop() { left.stopMotor(); right.stopMotor(); }
