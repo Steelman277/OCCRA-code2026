@@ -51,6 +51,7 @@ jar {
 }
 
 test { useJUnitPlatform() }
+deploy.targets.roborio.artifacts.frcJava.jarTask = jar
 
 // Register the robot JAR as the executable used by desktop simulation tasks.
 wpi.java.configureExecutableTasks(jar)

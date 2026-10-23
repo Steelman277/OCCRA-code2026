@@ -36,7 +36,7 @@ public final class Constants {
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
     public static final int ROLLER_CAN_ID = 6;
     // DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way.
-    public static final boolean DEPLOY_INVERTED = false;
+    public static final boolean DEPLOY_INVERTED = true;
     // DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way.
     public static final boolean ROLLER_INVERTED = false;
     // HARDWARE RATIO: motor turns per output turn; match the actual gearing, not a speed tuning knob.
@@ -47,11 +47,11 @@ public final class Constants {
     
     // Initial commissioning values, NOT measured mechanical limits.
     // RACK SPEED: positive extension voltage. More voltage increases speed/impact; retune endpoint current after changes.
-    public static final double DEPLOY_VOLTS = 1.5;
+    public static final double DEPLOY_VOLTS = 2.5;
     // RACK SPEED: negative retraction voltage. Tune magnitude independently; retain the retraction sign.
-    public static final double RETRACT_VOLTS = -1.5;
+    public static final double RETRACT_VOLTS = -2.5;
     // ROLLER SPEED: forward voltage, not RPM. Raise gradually if pickup is weak; lower if balls bounce or jam.
-    public static final double ROLLER_VOLTS = 3.0;
+    public static final double ROLLER_VOLTS = 4;
     // MOTOR CURRENT: stator amperes limit torque/heating. Choose for the mechanism; do not raise just to conceal a jam.
     public static final double DEPLOY_STATOR_LIMIT_AMPS = 25.0;
     // BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits.
@@ -61,9 +61,9 @@ public final class Constants {
     // BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits.
     public static final double ROLLER_SUPPLY_LIMIT_AMPS = 30.0;
     // ENDPOINT: extension stator-current threshold in amperes. Above normal running current, below DEPLOY_STATOR_LIMIT_AMPS.
-    public static final double DEPLOY_STOP_AMPS = 18.0;
+    public static final double DEPLOY_STOP_AMPS = 24.0;
     // ENDPOINT: retraction stator-current threshold in amperes. Measure separately from extension; below the stator limit.
-    public static final double RETRACT_STOP_AMPS = 18.0;
+    public static final double RETRACT_STOP_AMPS = 24.0;
     // ENDPOINT TIMING: ignore initial acceleration current this long. Too short false-trips; too long delays stopping at a nearby stop.
     public static final double STARTUP_IGNORE_SECONDS = 0.25;
     // ENDPOINT TIMING: current must remain above threshold this long. Longer rejects brief spikes but pushes against stops longer.
@@ -90,9 +90,9 @@ public final class Constants {
     // HARDWARE RATIO: motor turns per output turn; match the actual gearing, not a speed tuning knob.
     public static final double MOTOR_TURNS_PER_WHEEL_TURN = 2.0;
     // DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way.
-    public static final boolean LEFT_INVERTED = false;
+    public static final boolean LEFT_INVERTED = true;
     // DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way.
-    public static final boolean RIGHT_INVERTED = true;
+    public static final boolean RIGHT_INVERTED = false;
     // Commissioning settings: verify direction, speed, and detection on the robot.
     // FEED SPEED: forward voltage, not RPM. Raise gradually for throughput; lower for jams or excessive launcher speed sag.
     public static final double RUN_VOLTS = 2.0;
@@ -101,9 +101,9 @@ public final class Constants {
     // BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits.
     public static final double SUPPLY_LIMIT_AMPS = 20.0;
     // BALL DETECTION: center sensor distance threshold in meters. Tune using actual empty-path and ball measurements.
-    public static final double TRANSPORT_THRESHOLD_METERS = 0.15;
+    public static final double TRANSPORT_THRESHOLD_METERS = 0.1;
     // BALL DETECTION: launcher sensor distance threshold in meters. Shared with uptake/launch feed where present.
-    public static final double LAUNCHER_THRESHOLD_METERS = 0.15;
+    public static final double LAUNCHER_THRESHOLD_METERS = 0.1;
     // BALL DETECTION: trip below threshold minus this value; clear above threshold plus it. Increase only to reduce edge chatter.
     public static final double HYSTERESIS_METERS = 0.01;
     // OPTICAL RETURN: minimum sensor signal strength, not a distance. Tune in Tuner using real balls and empty-path readings.
@@ -120,7 +120,7 @@ public final class Constants {
     // HARDWARE RATIO: motor turns per output turn; match the actual gearing, not a speed tuning knob.
     public static final double MOTOR_TURNS_PER_WHEEL_TURN = 2.0;
     // DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way.
-    public static final boolean INVERTED = false;
+    public static final boolean INVERTED = true;
     // Initial commissioning values; tune direction and speed on the mechanism.
     // FEED SPEED: forward voltage, not RPM. Raise gradually for throughput; lower for jams or excessive launcher speed sag.
     public static final double RUN_VOLTS = 2.0;
