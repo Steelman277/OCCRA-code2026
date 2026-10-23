@@ -51,7 +51,7 @@ public final class Constants {
     // RACK SPEED: negative retraction voltage. Tune magnitude independently; retain the retraction sign.
     public static final double RETRACT_VOLTS = -2.5;
     // ROLLER SPEED: forward voltage, not RPM. Raise gradually if pickup is weak; lower if balls bounce or jam.
-    public static final double ROLLER_VOLTS = 4;
+    public static final double ROLLER_VOLTS = 7;
     // MOTOR CURRENT: stator amperes limit torque/heating. Choose for the mechanism; do not raise just to conceal a jam.
     public static final double DEPLOY_STATOR_LIMIT_AMPS = 25.0;
     // BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits.
@@ -125,7 +125,7 @@ public final class Constants {
     public static final boolean INVERTED = true;
     // Initial commissioning values; tune direction and speed on the mechanism.
     // FEED SPEED: forward voltage, not RPM. Raise gradually for throughput; lower for jams or excessive launcher speed sag.
-    public static final double RUN_VOLTS = 2.0;
+    public static final double RUN_VOLTS = 3.0;
     // MOTOR CURRENT: stator amperes limit torque/heating. Choose for the mechanism; do not raise just to conceal a jam.
     public static final double STATOR_LIMIT_AMPS = 30.0;
     // BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits.
