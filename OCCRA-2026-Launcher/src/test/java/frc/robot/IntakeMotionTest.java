@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class IntakeMotionTest {
+  // Simulate endpoint contact above both tuned thresholds, not a fixed commissioning current.
+  private static final double CONTACT_AMPS = Math.max(
+      Constants.Intake.DEPLOY_STOP_AMPS, Constants.Intake.RETRACT_STOP_AMPS) + 1.0;
   private IntakeMotion deployed() {
     var m = new IntakeMotion();
     m.toggleDeployment(0);
-    m.update(0.30, 22, true);
-    m.update(0.46, 22, true);
+    m.update(0.30, CONTACT_AMPS, true);
+    m.update(0.46, CONTACT_AMPS, true);
     return m;
   }
 
@@ -16,7 +19,7 @@ class IntakeMotionTest {
     var m = new IntakeMotion(); m.toggleDeployment(0);
     assertEquals(IntakeMotion.State.DEPLOYING, m.state());
     assertEquals(0, m.rollerVolts());
-    m.update(0.30, 22, true); m.update(0.46, 22, true);
+    m.update(0.30, CONTACT_AMPS, true); m.update(0.46, CONTACT_AMPS, true);
     assertEquals(Constants.Intake.ROLLER_VOLTS, m.rollerVolts());
     m.toggleDeployment(1);
     assertEquals(IntakeMotion.State.RETRACTING, m.state());
@@ -32,10 +35,10 @@ class IntakeMotionTest {
 
   @Test void nextDeploymentResetsRollerPause() {
     var m = deployed(); m.toggleRollers(); m.toggleDeployment(1);
-    m.update(1.30, 22, true); m.update(1.46, 22, true);
+    m.update(1.30, CONTACT_AMPS, true); m.update(1.46, CONTACT_AMPS, true);
     m.toggleDeployment(2); m.toggleRollers();
     assertEquals(0, m.rollerVolts());
-    m.update(2.30, 22, true); m.update(2.46, 22, true);
+    m.update(2.30, CONTACT_AMPS, true); m.update(2.46, CONTACT_AMPS, true);
     assertEquals(Constants.Intake.ROLLER_VOLTS, m.rollerVolts());
   }
 
@@ -63,21 +66,21 @@ class IntakeMotionTest {
   }
   @Test void ignoresStartupAndBriefSpikes() {
     var m = new IntakeMotion(); m.request(true, 0);
-    assertTrue(m.update(0.10, 22, true) > 0);
-    m.update(0.30, 22, true);
+    assertTrue(m.update(0.10, CONTACT_AMPS, true) > 0);
+    m.update(0.30, CONTACT_AMPS, true);
     m.update(0.35, 0, true);
-    assertTrue(m.update(0.55, 22, true) > 0);
+    assertTrue(m.update(0.55, CONTACT_AMPS, true) > 0);
     assertEquals(IntakeMotion.State.DEPLOYING, m.state());
   }
   @Test void sustainedCurrentStopsDeploymentAndRetraction() {
     var m = new IntakeMotion(); m.request(true, 0);
-    m.update(0.30, 22, true);
-    assertEquals(0, m.update(0.46, 22, true));
+    m.update(0.30, CONTACT_AMPS, true);
+    assertEquals(0, m.update(0.46, CONTACT_AMPS, true));
     assertEquals(IntakeMotion.State.DEPLOYED, m.state());
     m.request(false, 1);
     assertTrue(m.update(1.1, 0, true) < 0);
-    m.update(1.30, 22, true);
-    assertEquals(0, m.update(1.46, 22, true));
+    m.update(1.30, CONTACT_AMPS, true);
+    assertEquals(0, m.update(1.46, CONTACT_AMPS, true));
     assertEquals(IntakeMotion.State.RETRACTED, m.state());
   }
   @Test void timeoutLatchesUntilExplicitReset() {
@@ -106,12 +109,13 @@ class IntakeMotionTest {
     assertEquals(IntakeMotion.State.FAULT, m.state());
   }
   @Test void reversalRestartsSpikeQualification() {
-    var m = new IntakeMotion(); m.request(true, 0); m.update(0.30, 22, true);
+    var m = new IntakeMotion(); m.request(true, 0); m.update(0.30, CONTACT_AMPS, true);
     m.request(false, 0.4);
-    assertTrue(m.update(0.46, 22, true) < 0);
+    assertTrue(m.update(0.46, CONTACT_AMPS, true) < 0);
     assertEquals(IntakeMotion.State.RETRACTING, m.state());
   }
 }
+
 
 
 

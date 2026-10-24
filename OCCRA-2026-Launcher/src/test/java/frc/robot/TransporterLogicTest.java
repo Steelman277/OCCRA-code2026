@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class TransporterLogicTest {
+  // Simulate endpoint contact above both tuned thresholds, not a fixed commissioning current.
+  private static final double CONTACT_AMPS = Math.max(
+      Constants.Intake.DEPLOY_STOP_AMPS, Constants.Intake.RETRACT_STOP_AMPS) + 1.0;
   @Test void intakeNotDeployedBlocksEverySensorCombination() {
     for (boolean t : new boolean[]{false, true})
       for (boolean l : new boolean[]{false, true})
@@ -15,7 +18,7 @@ class TransporterLogicTest {
     assertFalse(canRun(intake));
     intake.toggleDeployment(0);
     assertFalse(canRun(intake));
-    intake.update(0.30, 22, true); intake.update(0.46, 22, true);
+    intake.update(0.30, CONTACT_AMPS, true); intake.update(0.46, CONTACT_AMPS, true);
     assertTrue(canRun(intake));
     intake.toggleRollers();
     assertTrue(canRun(intake)); // X only pauses intake rollers.
@@ -57,6 +60,7 @@ class TransporterLogicTest {
     assertTrue(TransporterLogic.shouldRun(true, true, true, true, false));
   }
 }
+
 
 
 

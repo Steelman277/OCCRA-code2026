@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class UptakeLogicTest {
+  // Simulate endpoint contact above both tuned thresholds, not a fixed commissioning current.
+  private static final double CONTACT_AMPS = Math.max(
+      Constants.Intake.DEPLOY_STOP_AMPS, Constants.Intake.RETRACT_STOP_AMPS) + 1.0;
   @Test void deployedAndClearRuns() {
     assertTrue(UptakeLogic.shouldRun(true, true, true, true, false));
   }
@@ -23,7 +26,7 @@ class UptakeLogicTest {
     var intake = new IntakeMotion();
     assertFalse(canRun(intake));
     intake.toggleDeployment(0); assertFalse(canRun(intake));
-    intake.update(0.30, 22, true); intake.update(0.46, 22, true);
+    intake.update(0.30, CONTACT_AMPS, true); intake.update(0.46, CONTACT_AMPS, true);
     assertTrue(canRun(intake));
     intake.toggleRollers(); assertTrue(canRun(intake));
     intake.toggleDeployment(1); assertFalse(canRun(intake));
@@ -35,6 +38,7 @@ class UptakeLogicTest {
         intake.state() == IntakeMotion.State.DEPLOYED, true, false);
   }
 }
+
 
 
 
