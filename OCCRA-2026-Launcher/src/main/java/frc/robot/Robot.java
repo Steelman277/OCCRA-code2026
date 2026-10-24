@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 
 /** Cumulative drivetrain, intake, transporter, uptake, and launcher robot project. */
@@ -35,13 +36,18 @@ public final class Robot extends TimedRobot {
     uptake.periodic(connected, intake.isDeployed(), transporter.launcherHealthy(), transporter.launcherTripped(), launching, ready, outtaking);
   }
   @Override public void disabledInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
-
+  private final Timer autoTimer = new Timer();
   @Override public void autonomousInit() { 
     launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop();  
-  drivetrain.drive(-0.05, 0, 0, isAutonomous());
+    autoTimer.restart();
   }
 
-  @Override public void autonomousPeriodic() { drivetrain.stop(); intake.stop(); transporter.periodic(false, false); launcher.stop(); uptake.stop(); }
+  @Override public void autonomousPeriodic() { 
+    intake.stop(); transporter.periodic(false, false); launcher.stop(); uptake.stop(); 
+    double time = autoTimer.get();
+    if (time < 3.0) {drivetrain.drive(-0.3,0,0,true);}
+    else {drivetrain.stop();}
+  }
   @Override public void teleopInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
   @Override public void teleopExit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
   @Override public void testInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
