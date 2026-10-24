@@ -21,10 +21,11 @@ public final class Robot extends TimedRobot {
       DriveInputs inputs = DriveInputs.fromXbox(driver.getLeftY(), driver.getLeftX(), driver.getRightX());
       drivetrain.drive(inputs.forward(), inputs.right(), inputs.clockwise(), driver.getLeftBumperButton());
       intake.periodic(driver.getAButtonPressed(), driver.getBButtonPressed(),
-          driver.getXButtonPressed(), driver.getStartButtonPressed());
+          driver.getXButtonPressed(), driver.getStartButtonPressed(), driver.getYButtonPressed());
     } else {
       drivetrain.stop(); intake.stop();
     }
+
     boolean fullShot = connected && driver.getRightTriggerAxis() > Constants.Launcher.TRIGGER_THRESHOLD;
     boolean lowShot = connected && driver.getLeftBumperButton() && !fullShot;
     boolean launching = fullShot || lowShot;
@@ -33,7 +34,12 @@ public final class Robot extends TimedRobot {
     uptake.periodic(connected, intake.isDeployed(), transporter.launcherHealthy(), transporter.launcherTripped(), launching, ready);
   }
   @Override public void disabledInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
-  @Override public void autonomousInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
+
+  @Override public void autonomousInit() { 
+    launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop();  
+  drivetrain.drive(-0.05, 0, 0, isAutonomous());
+  }
+
   @Override public void autonomousPeriodic() { drivetrain.stop(); intake.stop(); transporter.periodic(false, false); launcher.stop(); uptake.stop(); }
   @Override public void teleopInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
   @Override public void teleopExit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }

@@ -16,7 +16,8 @@ public final class IntakeMotion {
   }
 
   public void toggleRollers() {
-    if (state == State.DEPLOYED) rollersEnabled = !rollersEnabled;
+    if (state == State.DEPLOYED && rollersEnabled) rollersEnabled = false;
+    else if (state == State.DEPLOYED && !rollersEnabled) rollersEnabled = true;
   }
 
   public double rollerVolts() {

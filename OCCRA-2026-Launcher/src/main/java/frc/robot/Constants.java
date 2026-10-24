@@ -96,6 +96,7 @@ public final class Constants {
     // Commissioning settings: verify direction, speed, and detection on the robot.
     // FEED SPEED: forward voltage, not RPM. Raise gradually for throughput; lower for jams or excessive launcher speed sag.
     public static final double RUN_VOLTS = 3.0;
+    public static final double LAUNCH_VOLTS = 7.50;
     // MOTOR CURRENT: stator amperes limit torque/heating. Choose for the mechanism; do not raise just to conceal a jam.
     public static final double STATOR_LIMIT_AMPS = 25.0;
     // BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits.
@@ -138,17 +139,17 @@ public final class Constants {
     // Full shot voltage on right trigger; tune positive and at most 12 V.
     public static final double RUN_VOLTS = 6.0;
     // Low shot voltage on left bumper; positive and below RUN_VOLTS.
-    public static final double LOW_SHOT_VOLTS = 4.0;
+    public static final double LOW_SHOT_VOLTS = 4.4;
     // Time before feeding; does not verify wheel speed. Restarts on shot power change.
-    public static final double SPINUP_SECONDS = 2.0;
+    public static final double SPINUP_SECONDS = 0.750;
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
     public static final int LEFT_ID = 12;
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
     public static final int RIGHT_ID = 13;
     // DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way.
-    public static final boolean LEFT_INVERTED = false;
+    public static final boolean LEFT_INVERTED = true;
     // DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way.
-    public static final boolean RIGHT_INVERTED = true;
+    public static final boolean RIGHT_INVERTED = false;
     // HARDWARE RATIO: motor turns per output turn; match the actual gearing, not a speed tuning knob.
     public static final double MOTOR_TURNS_PER_WHEEL_TURN = 1.0;
     // DRIVER FEEL: right trigger fraction (0 to 1) above which launch is requested; not a speed command.

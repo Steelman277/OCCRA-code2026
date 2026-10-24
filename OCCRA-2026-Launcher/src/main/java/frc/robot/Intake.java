@@ -44,8 +44,9 @@ public final class Intake {
     return status.isOK();
   }
 
+
   public void periodic(boolean togglePressed, boolean retractPressed, boolean rollersPressed,
-      boolean clearPressed) {
+      boolean clearPressed, boolean outtakePressed) {
     double now = Timer.getFPGATimestamp();
     var current = deploy.getStatorCurrent();
     boolean fresh = current.getStatus().isOK()
@@ -55,7 +56,11 @@ public final class Intake {
     // Retraction wins if both buttons are pressed.
     if (retractPressed) motion.request(false, now);
     else if (togglePressed) motion.toggleDeployment(now);
+
+    if (outtakePressed) {motion.toggleRollers();roller.setControl(rollerRequest.withOutput(-6.0));}; //TODO make this work
     if (rollersPressed) motion.toggleRollers();
+
+
     double volts = motion.update(now, current.getValueAsDouble(), fresh);
     double rollerVolts = motion.rollerVolts();
     if (!deploy.setControl(deployRequest.withOutput(volts)).isOK()

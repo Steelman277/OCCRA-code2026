@@ -96,7 +96,14 @@ public final class Transporter {
         && fresh(tf) && fresh(lf) && tf.getValue() == 0 && lf.getValue() == 0;
     boolean running = TransporterLogic.shouldRun(enabled, healthy, intakeDeployed, transportTripped, l.getValue());
     running = FeedLogic.shouldRun(launchRequested, launcherReady, running, healthy, intakeDeployed);
-    double volts = running ? Constants.Transporter.RUN_VOLTS : 0;
+    boolean launchFeeding = launchRequested && launcherReady;
+
+    double volts = 0;
+    if (running) {
+      volts = launchFeeding
+        ? Constants.Transporter.LAUNCH_VOLTS
+        : Constants.Transporter.RUN_VOLTS;
+    }
     var leftStatus = left.setControl(leftRequest.withOutput(volts));
     var rightStatus = right.setControl(rightRequest.withOutput(volts));
     if (!leftStatus.isOK() || !rightStatus.isOK()) {
