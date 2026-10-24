@@ -76,14 +76,7 @@ CAN IDs, inversions and gear ratios describe hardware. Output caps, voltages and
 | `Constants.Launcher.LEFT_INVERTED` | `false` | DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way. |
 | `Constants.Launcher.RIGHT_INVERTED` | `true` | DIRECTION: verify wheel motion on the robot at low output. Change only if this motor moves the wrong way. |
 | `Constants.Launcher.MOTOR_TURNS_PER_WHEEL_TURN` | `1.0` | HARDWARE RATIO: motor turns per output turn; match the actual gearing, not a speed tuning knob. |
-| `Constants.Launcher.TARGET_RPM` | `3000` | SHOT SPEED: desired wheel RPM, not maximum motor speed. Tune for shot performance within wheel/mechanism ratings; code divides by 60. |
-| `Constants.Launcher.TOLERANCE_RPM` | `150` | FEED READINESS: BOTH motors must be within this +/- RPM band. Wider feeds sooner; do not widen to hide poor velocity tuning. |
-| `Constants.Launcher.READY_HOLD_SECONDS` | `0.20` | FEED READINESS: BOTH speeds must stay in tolerance this long. Longer rejects transients but delays feeding. |
-| `Constants.Launcher.SPINUP_TIMEOUT_SECONDS` | `5.0` | LAUNCH FAULT: maximum spin-up or speed-recovery wait. Measure real acceleration; diagnose unreachable target before extending. |
-| `Constants.Launcher.MAX_SIGNAL_AGE_SECONDS` | `0.10` | CAN HEALTH: maximum accepted telemetry age. Diagnose wiring/update rates before changing; larger allows older feedback. |
 | `Constants.Launcher.TRIGGER_THRESHOLD` | `0.15` | DRIVER FEEL: right trigger fraction (0 to 1) above which launch is requested; not a speed command. |
-| `Constants.Launcher.KV` | `0.12` | VELOCITY FEEDFORWARD: volts per mechanism rotation/second. Tune steady-speed baseline first. At 50 RPS, 0.12 contributes 6 V. |
-| `Constants.Launcher.KP` | `0.20` | PROPORTIONAL GAIN: volts per RPS of speed error. Increase gradually for correction; reduce if speed oscillates. I and D remain zero. |
 | `Constants.Launcher.STATOR_LIMIT_AMPS` | `60` | MOTOR CURRENT: stator amperes limit torque/heating. Choose for the mechanism; do not raise just to conceal a jam. |
 | `Constants.Launcher.SUPPLY_LIMIT_AMPS` | `40` | BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits. |
 
@@ -123,24 +116,21 @@ Tune Uptake.RUN_VOLTS for smooth movement toward the launcher. It is a voltage c
 
 With a launcher installed, excessive uptake/transporter speed can load the launcher faster than it recovers. Reduce feed voltage before compensating with a loose launcher readiness tolerance. Recheck for jams using real balls.
 
-## Launcher target speed and velocity gains
+## Temporary raw voltage launcher
 
-Watch `Launcher/LeftRPM`, `RightRPM`, `TargetRPM`, `Ready`, `State` and `Healthy`. The two motors have mirrored inversion, but both should report positive speed in the configured forward direction. They share the same gains and target; inspect friction, wiring and assembly differences if only one motor performs poorly.
+Hold right trigger to apply **6 V** to both mirrored launcher motors. Hold left bumper for a **4 V low-power shot**, tuned with `Constants.Launcher.LOW_SHOT_VOLTS` (positive and below RUN_VOLTS). Right trigger takes priority when both controls are held. Left bumper also retains drivetrain slow mode. Adjust `Constants.Launcher.RUN_VOLTS` for output (positive, at most 12 V); retain motor inversion to mirror physical rotation. This is voltage control, not RPM regulation. Battery voltage, current limiting and ball loading affect actual speed.
 
-**TARGET_RPM = 3000** is the requested shot speed, not full available motor speed. Choose a target appropriate to wheel ratings, mechanism and shot distance. Changing target RPM changes shot performance; changing PID/feedforward changes how accurately and quickly the motors reach that target.
+`Constants.Launcher.SPINUP_SECONDS = 2.0` is the continuous shot-hold delay before launch feeding is permitted. During the delay transporter and uptake keep normal sensor rules. After the delay the launch override feeds through occupied sensor stops, with intake-deployed and feeder-health interlocks unchanged. Release both shot controls to stop launcher commands and restore normal collection. Every new press, change between low/full power, or mode restart begins a new delay. Wheels coast down.
 
-The current controller uses **kV feedforward plus kP**, with **kI and kD left at Phoenix configuration defaults of zero**. There are no KI/KD constants currently wired into the program. If I or D is later needed, add those values inside Constants.Launcher and explicitly assign them to Slot0 in Launcher.java. Do not create another constants file.
+There is no PID, target RPM, RPM qualification, speed-sag pause, or speed-recovery timeout in this temporary version. `Launcher/Ready` means delay elapsed, NOT measured full speed. Verify both motors physically accelerate before loading balls; increase the delay if necessary. The launcher cannot detect a stalled or slow wheel from speed in this mode, and can permit feeding even if a controller's internal protection has inhibited its motor.
 
-1. Verify opposite physical rotations and correct positive RPM readings with no balls. Do not use absolute RPM to conceal wrong direction.
-2. Tune KV for the approximate steady-speed voltage baseline, then KP for correction and recovery. VelocityVoltage uses rotations per second: 3000 RPM / 60 = 50 RPS. At KV=0.12, the feedforward contribution at 50 RPS is 6 V. KP=0.20 adds 0.20 V per RPS of speed error: a 300 RPM error is 5 RPS, or 1 V of proportional contribution. Output is constrained by available voltage and limits; these calculations do not guarantee wheel speed.
-3. If both motors settle below target, inspect voltage/current limiting and mechanical drag, then adjust KV in small steps. If response is sluggish, increase KP gradually. If RPM hunts or oscillates, reduce KP and check noisy feedback. Keep I/D zero initially; integral can wind up against output limits and derivative can amplify noise. Do not use them to compensate for an unreachable target.
-4. Once the no-load speeds are stable, test with balls and observe speed sag and recovery. Adjust feeder voltage and velocity gains based on the measured behavior.
-5. Set TOLERANCE_RPM based on acceptable shot-speed variation, not merely to make READY appear. Both motors must stay inside the band continuously for READY_HOLD_SECONDS. A wider band or shorter hold allows earlier feeding but less settled speed. A tighter band or longer hold can prevent or delay feeding.
-6. SPINUP_TIMEOUT_SECONDS must exceed expected acceleration/recovery time. If it trips, check target feasibility, battery condition, current limits, direction and gains before extending it. MAX_SIGNAL_AGE_SECONDS is a feedback-health check, not a PID adjustment.
+Current limits, mirrored inversion and coast mode remain configured. Failed configuration or rejected voltage commands latch inhibition until repair and restart; RioLog now reports the CTRE status and affected motor. The previous RPM freshness and aggregate fault-field checks no longer latch software faults; motor internal protections remain active. This change does not establish the cause of the original fault. Inspect `Launcher/LeftFaultBits` and `RightFaultBits` in Tuner if symptoms persist.
 
-Hold right trigger to request launch. **During acceleration and speed recovery, transporter and uptake keep their normal sensor-controlled functions.** Once both speeds qualify, the launch override allows feeding through occupied sensor stops. A speed drop removes that override and restores normal collection; it does not unconditionally stop both feeders. Intake must remain deployed and required feedback healthy. A launch timeout stops launcher commands and the override; normal collection can continue. Release the trigger to reset an attempt. Configuration or command failures require repair and code restart.
+Dashboard: `Launcher/ControlMode`, `State`, `Fault`, `CommandedVolts`, `SpinupSeconds`, `Ready`, `Healthy`, `LeftFaultBits`, `RightFaultBits`. Old RPM/target widgets are no longer published by this version and should not be used to judge readiness.
 
-Target RPM, gains, tolerance and hold time all live in Constants.Launcher. A target change does not automatically retune the gains. Feed motor voltage settings remain in their own sections of the same Constants.java file.
+Start with no balls and verify correct mirrored direction and spin-up. Then test staging during the delay, feeding after delay, trigger release, intake retraction, disable and controller disconnect. All constants remain in Constants.java. Earlier project folders are unchanged.
+
+
 
 ## Tuning record
 
@@ -149,4 +139,5 @@ Target RPM, gains, tolerance and hold time all live in Constants.Launcher. A tar
 | | | | | | |
 
 After each successful change, save the measured result here and sync this project. Update the guide's reference values if you change the constants. Hardware verification is still needed even when software tests pass.
+
 

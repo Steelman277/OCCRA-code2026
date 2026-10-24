@@ -1,61 +1,46 @@
 package frc.robot;
-
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
 class LauncherLogicTest {
-  @Test void bothWheelsMustSettleBeforeFeeding() {
-    var l = new LauncherLogic();
-    assertFalse(l.update(true, true, 0, 0, 0));
-    assertFalse(l.update(true, true, 3000, 2000, 1));
-    assertFalse(l.update(true, true, 3000, 3000, 2));
-    assertFalse(l.update(true, true, 3000, 3000, 2.1));
-    assertTrue(l.update(true, true, 3000, 3000, 2.21));
+  @Test void switchingShotPowerRestartsDelayInBothDirections() {
+    var l = new LauncherLogic(); double d = Constants.Launcher.SPINUP_SECONDS;
+    assertFalse(l.update(true, true, true, 0));
+    assertTrue(l.update(true, true, true, d));
+    assertFalse(l.update(true, false, true, d + 1));
+    assertTrue(l.update(true, false, true, 2 * d + 1));
+    assertFalse(l.update(true, true, true, 2 * d + 2));
+    assertTrue(l.update(true, true, true, 3 * d + 2));
   }
-  @Test void speedDropStopsFeedAndRequiresRequalification() {
+  @Test void changingShotCannotClearFault() {
     var l = new LauncherLogic();
-    l.update(true, true, 3000, 3000, 0);
-    assertTrue(l.update(true, true, 3000, 3000, .21));
-    assertFalse(l.update(true, true, 2800, 3000, .3));
-    assertFalse(l.update(true, true, 3000, 3000, .4));
-    assertTrue(l.update(true, true, 3000, 3000, .61));
-  }
-  @Test void wrongDirectionAndOverspeedAreNotReady() {
-    var l = new LauncherLogic();
-    l.update(true, true, 3000, -3000, 0);
-    assertFalse(l.update(true, true, 3000, -3000, 1));
-    assertFalse(l.update(true, true, 3400, 3400, 2));
-  }
-  @Test void badFeedbackLatchesUntilRelease() {
-    var l = new LauncherLogic();
-    l.update(true, true, 3000, 3000, 0);
-    assertTrue(l.update(true, true, 3000, 3000, .21));
-    assertFalse(l.update(true, false, 3000, 3000, .3));
-    assertFalse(l.update(true, true, 3000, 3000, 1));
-    assertFalse(l.update(false, true, 3000, 3000, 2));
-    assertEquals(LauncherLogic.State.IDLE, l.state());
-    assertFalse(l.update(true, true, 3000, 3000, 3));
-    assertTrue(l.update(true, true, 3000, 3000, 3.21));
-  }
-  @Test void timeoutStopsSpinup() {
-    var l = new LauncherLogic();
-    l.update(true, true, 100, 100, 0);
-    assertFalse(l.update(true, true, 100, 100, 5));
+    assertFalse(l.update(true, true, false, 0));
+    assertFalse(l.update(true, false, true, 10));
     assertEquals(LauncherLogic.State.FAULT, l.state());
   }
-  @Test void nonFiniteFeedbackCannotFeed() {
-    var l = new LauncherLogic();
-    assertFalse(l.update(true, true, Double.NaN, 3000, 0));
-    assertEquals(LauncherLogic.State.FAULT, l.state());
+  @Test void waitsForFullDelay() {
+    var l = new LauncherLogic(); double d = Constants.Launcher.SPINUP_SECONDS;
+    assertFalse(l.update(true, true, 10));
+    assertFalse(l.update(true, true, 10 + d / 2));
+    assertTrue(l.update(true, true, 10 + d));
+    assertTrue(l.update(true, true, 20 + d));
   }
-  @Test void releaseAndStopRemoveReady() {
-    var l = new LauncherLogic(); l.update(true, true, 3000, 3000, 0);
-    assertTrue(l.update(true, true, 3000, 3000, .21));
-    assertFalse(l.update(false, true, 3000, 3000, .3));
+  @Test void releaseRestartsDelay() {
+    var l = new LauncherLogic(); double d = Constants.Launcher.SPINUP_SECONDS;
+    l.update(true, true, 0); assertTrue(l.update(true, true, d));
+    assertFalse(l.update(false, true, d + 1));
+    assertFalse(l.update(true, true, d + 2));
+  }
+  @Test void failureBlocksUntilReleased() {
+    var l = new LauncherLogic();
+    assertFalse(l.update(true, false, 0));
+    assertFalse(l.update(true, true, 10));
+    assertEquals(LauncherLogic.State.FAULT, l.state());
+    l.update(false, true, 11);
+    assertFalse(l.update(true, true, 12));
+  }
+  @Test void stopClearsTimer() {
+    var l = new LauncherLogic(); l.update(true, true, 0);
     l.reset(); assertEquals(LauncherLogic.State.IDLE, l.state());
+    assertFalse(l.update(true, true, 100));
   }
 }
-
-
-
-

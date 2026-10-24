@@ -20,7 +20,7 @@ Cumulative project copied from the complete uptake project, with mirrored launch
 
 One motor drives each pair of wheels, two motors total. The ratio is interpreted as two motor rotations per wheel rotation. The right motor starts inverted relative to the left so both sides carry balls toward the launcher; verify physical direction before loading balls. These IDs reserve 1–6 for the existing mechanisms but must be assigned to the devices in Phoenix Tuner X.
 
-## Normal collection controls (right trigger released)
+## Normal collection controls (both shot controls released)
 
 Connect an Xbox controller in Driver Station USB slot 0. In Teleoperated mode, the transporter runs automatically with the intake fully deployed when the sensors allow it. RETRACTED, DEPLOYING, RETRACTING, UNKNOWN, and FAULT block the transporter. Intake updates first, so starting retraction stops transport in the same loop. Losing the controller, disabling, autonomous, or test mode stops all five mechanisms. A toggles intake deployment, X toggles intake rollers, B explicitly retracts, and Start stops intake/clears its motion fault. X affects intake rollers only.
 
@@ -77,7 +77,7 @@ Support the chassis with wheels clear. Check forward, right strafe and right tur
 
 
 
-## Normal uptake behavior and checkout (right trigger released)
+## Normal uptake behavior and checkout (both shot controls released)
 
 The uptake automatically runs in Teleop while the intake is fully DEPLOYED and the launcher CANrange is healthy and clear. Both uptake and transporter operate automatically; neither requires a bumper press. X only pauses intake rollers; it does not pause uptake or transport. Starting intake retraction immediately stops uptake in the same control loop.
 
@@ -101,41 +101,18 @@ Uptake resumes automatically when the launcher clears and the intake remains dep
 The added tests cover uptake permissions, occupied/clear transitions, unhealthy feedback inhibition, and the intake lifecycle. Build success does not replace physical motor direction, optical detection, or mechanism checkout.
 
 
-## Launch sequence: hold right trigger
+## Temporary raw voltage launcher
 
-Target speed is **3,000 RPM**, selected by the user, not maximum available motor speed. Right trigger above 0.15 requests launching; release it to stop commanding launcher rotation and return transporter/uptake to their normal collection rules. Flywheels coast down. Intake controls and drivetrain remain active throughout.
+Hold right trigger to apply **6 V** to both mirrored launcher motors. Hold left bumper for a **4 V low-power shot**, tuned with `Constants.Launcher.LOW_SHOT_VOLTS` (positive and below RUN_VOLTS). Right trigger takes priority when both controls are held. Left bumper also retains drivetrain slow mode. Adjust `Constants.Launcher.RUN_VOLTS` for output (positive, at most 12 V); retain motor inversion to mirror physical rotation. This is voltage control, not RPM regulation. Battery voltage, current limiting and ball loading affect actual speed.
 
-1. Both Kraken X60 motors receive independent closed-loop velocity commands of 50 rotations/second, with 1:1 ratios. Right motor inversion mirrors its physical rotation. Both report positive mechanism RPM in the configured forward direction.
-2. While spinning up, transporter and uptake retain normal collection behavior: transporter runs unless both CANrange sensors are tripped, and uptake runs while the launcher sensor is clear. Intake must remain fully deployed and feedback healthy. Balls can advance and stage during acceleration. The intake rollers retain their existing A/X behavior.
-3. Both signed RPM readings must be within 150 RPM of the target continuously for 0.20 seconds. A single at-speed motor is insufficient; wrong-direction and overspeed readings do not qualify.
-4. Once ready, transporter and uptake run automatically. This overrides both-sensors-occupied transporter stopping and launcher-occupied uptake stopping so staged balls can enter the launcher. Both still require the intake fully DEPLOYED and healthy sensor/controller configuration. Retracting immediately removes feed permission, although the launcher keeps spinning while the trigger is held.
-5. A speed drop outside tolerance removes the launch override immediately and restores normal sensor-controlled collection while the wheels recover. The occupied launcher sensor stops uptake, and both occupied sensors stop transporter. After both motors requalify for 0.20 seconds, launch feeding resumes. The trigger may remain held to feed successive balls.
+`Constants.Launcher.SPINUP_SECONDS = 2.0` is the continuous shot-hold delay before launch feeding is permitted. During the delay transporter and uptake keep normal sensor rules. After the delay the launch override feeds through occupied sensor stops, with intake-deployed and feeder-health interlocks unchanged. Release both shot controls to stop launcher commands and restore normal collection. Every new press, change between low/full power, or mode restart begins a new delay. Wheels coast down.
 
-Spin-up/recovery taking 5 seconds without readiness faults the launch attempt and stops launcher commands and the launch feed override; normal sensor-controlled collection remains active. Stale/failed RPM feedback, reported launcher motor faults, or invalid speed values also fault the attempt. Release the trigger to reset the attempt and retry after resolving the issue. Launcher configuration/command errors require code restart after repair. Disabled, autonomous, test mode and controller disconnect stop launcher commands and the other mechanisms. Normal sensor-controlled collection may resume on trigger release; trigger release is not an all-mechanism stop.
+There is no PID, target RPM, RPM qualification, speed-sag pause, or speed-recovery timeout in this temporary version. `Launcher/Ready` means delay elapsed, NOT measured full speed. Verify both motors physically accelerate before loading balls; increase the delay if necessary. The launcher cannot detect a stalled or slow wheel from speed in this mode, and can permit feeding even if a controller's internal protection has inhibited its motor.
 
-The existing CANrange sensor objects are reused. Loss of required sensor health blocks the corresponding feeder even when launcher speed is ready. The launcher motors can spin with intake retracted, but cannot feed. Earlier projects remain unchanged.
+Current limits, mirrored inversion and coast mode remain configured. Failed configuration or rejected voltage commands latch inhibition until repair and restart; RioLog now reports the CTRE status and affected motor. The previous RPM freshness and aggregate fault-field checks no longer latch software faults; motor internal protections remain active. This change does not establish the cause of the original fault. Inspect `Launcher/LeftFaultBits` and `RightFaultBits` in Tuner if symptoms persist.
 
-## Launcher tuning and commissioning
+Dashboard: `Launcher/ControlMode`, `State`, `Fault`, `CommandedVolts`, `SpinupSeconds`, `Ready`, `Healthy`, `LeftFaultBits`, `RightFaultBits`. Old RPM/target widgets are no longer published by this version and should not be used to judge readiness.
 
-`Constants.java (Launcher section)`: proposed CAN IDs 12/13, opposite inversion settings, 1:1 ratios, 3,000 RPM target, 150 RPM tolerance, 0.20-second ready hold, 5-second timeout, 60 A stator and 40 A supply limit per motor. Starting velocity-voltage gains are kV=0.12 volts per rotation/second and kP=0.20 volts per rotation/second of error, with no integral or derivative term. These are uncalibrated starting gains. Tune speed response and feeder voltages on actual hardware. Phoenix 6 velocity control uses rotations/second, so the code converts RPM by dividing by 60. FOC is explicitly disabled in the velocity requests.
-
-1. Confirm CAN IDs and correct firmware in Phoenix Tuner X. With no balls loaded and the assembly clear, verify opposite physical motor rotations drive the launcher in the intended direction. Check both configured-forward RPM readings are positive. Disable before changing inversion settings.
-2. Watch `Launcher/LeftRPM`, `RightRPM`, `TargetRPM`, `State`, `Ready`, and `Healthy`. Tune gains to reach and hold 3,000 RPM without oscillation; do not widen readiness tolerance merely to mask poor control.
-3. With intake deployed and no balls, hold right trigger. Verify both feeders follow normal sensor rules during spin-up. Trip the launcher sensor to verify uptake stages the ball, then verify the occupied-sensor feed override begins only after both RPM readings settle. No bumper input is needed.
-4. Verify launcher sensor occupancy no longer blocks feed once ready. Verify loss of launcher sensor feedback does still block feed.
-5. Load balls for controlled tests. Verify speed sag restores normal sensor stops and speed recovery restores the launch feed override. Verify A retraction blocks feed immediately, and disable/controller disconnect stops every mechanism.
-6. Verify releasing the trigger stops launcher commands and restores the documented normal collection controls. The wheels coast; commanded zero is not instantaneous physical rest.
-
-Automated launcher tests cover settling, both-motor qualification, wrong-direction/overspeed feedback, feedback loss, timeout, release/reset, feed overrides, intake gating, and sag/recovery. The full build also runs all inherited mechanism tests; hardware behavior still requires commissioning.
-
-References: [CTRE velocity-voltage control](https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/closed-loop-requests.html), [VelocityVoltage API](https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/controls/VelocityVoltage.html).
+Start with no balls and verify correct mirrored direction and spin-up. Then test staging during the delay, feeding after delay, trigger release, intake retraction, disable and controller disconnect. All constants remain in Constants.java. Earlier project folders are unchanged.
 
 
-
-
-
-
-
-All robot settings are in src/main/java/frc/robot/Constants.java. Drivetrain and driver settings are at the top; included mechanisms have named nested sections in the same file. No mechanism-specific constants files are needed.
-
-See [Tuning guide](TUNING.md) for every setting, units, symptoms, and a step-by-step tuning procedure.

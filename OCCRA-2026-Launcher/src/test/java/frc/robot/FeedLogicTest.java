@@ -31,17 +31,14 @@ class FeedLogicTest {
     assertFalse(FeedLogic.shouldRun(false, true, false, true, true));
     assertTrue(FeedLogic.shouldRun(false, false, true, true, true));
   }
-  @Test void speedDropRestoresNormalSensorRules() {
+  @Test void timedLaunchPreservesCollectionThenOverridesOccupancy() {
     var launcher = new LauncherLogic();
-    launcher.update(true, true, 3000, 3000, 0);
-    boolean ready = launcher.update(true, true, 3000, 3000, .21);
-    assertTrue(FeedLogic.shouldRun(true, ready, false, true, true));
-    ready = launcher.update(true, true, 2500, 3000, .3);
+    boolean ready = launcher.update(true, true, 0);
     assertTrue(FeedLogic.shouldRun(true, ready, true, true, true));
     assertFalse(FeedLogic.shouldRun(true, ready, false, true, true));
+    ready = launcher.update(true, true, Constants.Launcher.SPINUP_SECONDS);
+    assertTrue(FeedLogic.shouldRun(true, ready, false, true, true));
+    ready = launcher.update(false, true, Constants.Launcher.SPINUP_SECONDS + 1);
+    assertFalse(FeedLogic.shouldRun(false, ready, false, true, true));
   }
 }
-
-
-
-

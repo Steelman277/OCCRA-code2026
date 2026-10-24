@@ -25,8 +25,10 @@ public final class Robot extends TimedRobot {
     } else {
       drivetrain.stop(); intake.stop();
     }
-    boolean launching = connected && driver.getRightTriggerAxis() > Constants.Launcher.TRIGGER_THRESHOLD;
-    boolean ready = launcher.periodic(launching);
+    boolean fullShot = connected && driver.getRightTriggerAxis() > Constants.Launcher.TRIGGER_THRESHOLD;
+    boolean lowShot = connected && driver.getLeftBumperButton() && !fullShot;
+    boolean launching = fullShot || lowShot;
+    boolean ready = launcher.periodic(launching, lowShot);
     transporter.periodic(connected, intake.isDeployed(), launching, ready);
     uptake.periodic(connected, intake.isDeployed(), transporter.launcherHealthy(), transporter.launcherTripped(), launching, ready);
   }
@@ -38,6 +40,7 @@ public final class Robot extends TimedRobot {
   @Override public void testInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
   @Override public void testPeriodic() { drivetrain.stop(); intake.stop(); transporter.periodic(false, false); launcher.stop(); uptake.stop(); }
 }
+
 
 
 

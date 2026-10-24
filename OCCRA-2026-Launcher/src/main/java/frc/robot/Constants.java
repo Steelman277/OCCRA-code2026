@@ -135,6 +135,12 @@ public final class Constants {
   // Launcher settings.
   public static final class Launcher {
     private Launcher() {}
+    // Full shot voltage on right trigger; tune positive and at most 12 V.
+    public static final double RUN_VOLTS = 6.0;
+    // Low shot voltage on left bumper; positive and below RUN_VOLTS.
+    public static final double LOW_SHOT_VOLTS = 4.0;
+    // Time before feeding; does not verify wheel speed. Restarts on shot power change.
+    public static final double SPINUP_SECONDS = 2.0;
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
     public static final int LEFT_ID = 12;
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
@@ -145,28 +151,16 @@ public final class Constants {
     public static final boolean RIGHT_INVERTED = true;
     // HARDWARE RATIO: motor turns per output turn; match the actual gearing, not a speed tuning knob.
     public static final double MOTOR_TURNS_PER_WHEEL_TURN = 1.0;
-    // SHOT SPEED: desired wheel RPM, not maximum motor speed. Tune for shot performance within wheel/mechanism ratings; code divides by 60.
-    public static final double TARGET_RPM = 3000;
-    // FEED READINESS: BOTH motors must be within this +/- RPM band. Wider feeds sooner; do not widen to hide poor velocity tuning.
-    public static final double TOLERANCE_RPM = 150;
-    // FEED READINESS: BOTH speeds must stay in tolerance this long. Longer rejects transients but delays feeding.
-    public static final double READY_HOLD_SECONDS = 0.20;
-    // LAUNCH FAULT: maximum spin-up or speed-recovery wait. Measure real acceleration; diagnose unreachable target before extending.
-    public static final double SPINUP_TIMEOUT_SECONDS = 5.0;
-    // CAN HEALTH: maximum accepted telemetry age. Diagnose wiring/update rates before changing; larger allows older feedback.
-    public static final double MAX_SIGNAL_AGE_SECONDS = 0.10;
     // DRIVER FEEL: right trigger fraction (0 to 1) above which launch is requested; not a speed command.
     public static final double TRIGGER_THRESHOLD = 0.15;
-    // Starting velocity gains (volts per rotor RPS); tune on the launcher.
-    // VELOCITY FEEDFORWARD: volts per mechanism rotation/second. Tune steady-speed baseline first. At 50 RPS, 0.12 contributes 6 V.
-    public static final double KV = 0.12;
-    // PROPORTIONAL GAIN: volts per RPS of speed error. Increase gradually for correction; reduce if speed oscillates. I and D remain zero.
-    public static final double KP = 0.20;
+
     // MOTOR CURRENT: stator amperes limit torque/heating. Choose for the mechanism; do not raise just to conceal a jam.
     public static final double STATOR_LIMIT_AMPS = 60;
     // BATTERY CURRENT: supply amperes limit battery load. Too low may slow acceleration; coordinate with robot power limits.
     public static final double SUPPLY_LIMIT_AMPS = 40;
   }
 }
+
+
 
 
