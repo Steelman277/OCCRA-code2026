@@ -24,9 +24,9 @@ public final class Constants {
   // DRIVER FEEL: fraction of stick travel ignored around center. Increase for drift; decrease for finer small commands.
   public static final double DEADBAND = 0.08;
   // DRIVE SPEED: maximum normalized wheel output (0 to 1). Increase only after direction and stopping checks.
-  public static final double MAX_OUTPUT = 0.50;
+  public static final double MAX_OUTPUT = 1.0;
   // DRIVE SPEED: output cap while left bumper is held (0 to 1); normally below MAX_OUTPUT.
-  public static final double SLOW_OUTPUT = 0.25;
+  public static final double SLOW_OUTPUT = 0.5;
 
   // Intake settings.
   public static final class Intake {
