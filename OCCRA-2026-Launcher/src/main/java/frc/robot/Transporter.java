@@ -79,6 +79,9 @@ public final class Transporter {
   }
 
   public void periodic(boolean enabled, boolean intakeDeployed, boolean launchRequested, boolean launcherReady) {
+    periodic(enabled, intakeDeployed, launchRequested, launcherReady, false);
+  }
+  public void periodic(boolean enabled, boolean intakeDeployed, boolean launchRequested, boolean launcherReady, boolean outtaking) {
     var t = transport.getIsDetected();
     var strength = transport.getSignalStrength();
     double signalStrength = strength.getValueAsDouble();
@@ -104,6 +107,8 @@ public final class Transporter {
         ? Constants.Transporter.LAUNCH_VOLTS
         : Constants.Transporter.RUN_VOLTS;
     }
+    volts = OuttakeLogic.volts(outtaking, enabled && healthy && intakeDeployed, volts, Constants.Transporter.OUTTAKE_VOLTS);
+    running = volts != 0;
     var leftStatus = left.setControl(leftRequest.withOutput(volts));
     var rightStatus = right.setControl(rightRequest.withOutput(volts));
     if (!leftStatus.isOK() || !rightStatus.isOK()) {
@@ -127,6 +132,8 @@ public final class Transporter {
 
   public void stop() { left.stopMotor(); right.stopMotor(); }
 }
+
+
 
 
 

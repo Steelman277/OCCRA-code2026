@@ -116,3 +116,7 @@ Dashboard: `Launcher/ControlMode`, `State`, `Fault`, `CommandedVolts`, `SpinupSe
 Start with no balls and verify correct mirrored direction and spin-up. Then test staging during the delay, feeding after delay, trigger release, intake retraction, disable and controller disconnect. All constants remain in Constants.java. Earlier project folders are unchanged.
 
 
+
+## Hold Y to outtake
+
+Hold Y to reverse intake rollers (-8 V), transporter (-8 V), and uptake (-6 V). Tune OUTTAKE_VOLTS in each mechanism section of Constants.java. Intake must be fully deployed and existing health checks must pass. Occupancy does not stop reverse flow. Y overrides shot controls and stops launcher commands. Release Y to restore normal collection and restart the launch delay if a shot control remains held. X is ignored while Y is held; its previous roller setting is preserved. Retraction stops reverse flow. Rack speed is unchanged.

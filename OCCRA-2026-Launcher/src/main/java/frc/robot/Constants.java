@@ -31,6 +31,8 @@ public final class Constants {
   // Intake settings.
   public static final class Intake {
     private Intake() {}
+    // HOLD Y reverse voltage: tune between -12 and 0 V for ejection.
+    public static final double OUTTAKE_VOLTS = -8.0;
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
     public static final int DEPLOY_CAN_ID = 5;
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
@@ -77,6 +79,8 @@ public final class Constants {
   // Transporter settings.
   public static final class Transporter {
     private Transporter() {}
+    // HOLD Y reverse voltage: tune between -12 and 0 V for ejection.
+    public static final double OUTTAKE_VOLTS = -8.0;
     // Proposed assignments, leaving IDs 1-6 for drivetrain and intake.
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
     public static final int LEFT_MOTOR_ID = 7;
@@ -118,6 +122,8 @@ public final class Constants {
   // Uptake settings.
   public static final class Uptake {
     private Uptake() {}
+    // HOLD Y reverse voltage: tune between -12 and 0 V for ejection.
+    public static final double OUTTAKE_VOLTS = -6.0;
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
     public static final int MOTOR_ID = 11;
     // HARDWARE RATIO: motor turns per output turn; match the actual gearing, not a speed tuning knob.
@@ -161,6 +167,9 @@ public final class Constants {
     public static final double SUPPLY_LIMIT_AMPS = 40;
   }
 }
+
+
+
 
 
 

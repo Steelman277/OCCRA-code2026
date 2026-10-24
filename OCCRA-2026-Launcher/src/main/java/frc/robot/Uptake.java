@@ -35,11 +35,16 @@ public final class Uptake {
 
   public void periodic(boolean enabled, boolean intakeDeployed, boolean launcherHealthy,
       boolean launcherTripped, boolean launchRequested, boolean launcherReady) {
+    periodic(enabled, intakeDeployed, launcherHealthy, launcherTripped, launchRequested, launcherReady, false);
+  }
+  public void periodic(boolean enabled, boolean intakeDeployed, boolean launcherHealthy, boolean launcherTripped, boolean launchRequested, boolean launcherReady, boolean outtaking) {
     boolean running = UptakeLogic.shouldRun(enabled, configured && !commandFault,
         intakeDeployed, launcherHealthy, launcherTripped);
     running = FeedLogic.shouldRun(launchRequested, launcherReady, running,
         enabled && configured && !commandFault && launcherHealthy, intakeDeployed);
-    var status = motor.setControl(request.withOutput(running ? Constants.Uptake.RUN_VOLTS : 0));
+    double volts = OuttakeLogic.volts(outtaking, enabled && configured && !commandFault && launcherHealthy && intakeDeployed, running ? Constants.Uptake.RUN_VOLTS : 0, Constants.Uptake.OUTTAKE_VOLTS);
+    running = volts != 0;
+    var status = motor.setControl(request.withOutput(volts));
     if (!status.isOK()) {
       if (!commandFault) DriverStation.reportError("Uptake command failed; fix CAN/power and restart code", false);
       commandFault = true;
@@ -54,6 +59,8 @@ public final class Uptake {
 
   public void stop() { motor.stopMotor(); }
 }
+
+
 
 
 

@@ -16,22 +16,23 @@ public final class Robot extends TimedRobot {
   @Override public void teleopPeriodic() {
     boolean connected = DriverStation.isJoystickConnected(Constants.DRIVER_PORT)
         && DriverStation.getJoystickIsXbox(Constants.DRIVER_PORT);
+    boolean outtaking = connected && driver.getYButton();
     // Transport runs automatically when intake position and sensor interlocks allow.
     if (connected) {
       DriveInputs inputs = DriveInputs.fromXbox(driver.getLeftY(), driver.getLeftX(), driver.getRightX());
       drivetrain.drive(inputs.forward(), inputs.right(), inputs.clockwise(), driver.getLeftBumperButton());
       intake.periodic(driver.getAButtonPressed(), driver.getBButtonPressed(),
-          driver.getXButtonPressed(), driver.getStartButtonPressed(), driver.getYButtonPressed());
+          driver.getXButtonPressed(), driver.getStartButtonPressed(), outtaking);
     } else {
       drivetrain.stop(); intake.stop();
     }
 
     boolean fullShot = connected && driver.getRightTriggerAxis() > Constants.Launcher.TRIGGER_THRESHOLD;
     boolean lowShot = connected && driver.getLeftBumperButton() && !fullShot;
-    boolean launching = fullShot || lowShot;
+    boolean launching = !outtaking && (fullShot || lowShot);
     boolean ready = launcher.periodic(launching, lowShot);
-    transporter.periodic(connected, intake.isDeployed(), launching, ready);
-    uptake.periodic(connected, intake.isDeployed(), transporter.launcherHealthy(), transporter.launcherTripped(), launching, ready);
+    transporter.periodic(connected, intake.isDeployed(), launching, ready, outtaking);
+    uptake.periodic(connected, intake.isDeployed(), transporter.launcherHealthy(), transporter.launcherTripped(), launching, ready, outtaking);
   }
   @Override public void disabledInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
 
@@ -46,6 +47,10 @@ public final class Robot extends TimedRobot {
   @Override public void testInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
   @Override public void testPeriodic() { drivetrain.stop(); intake.stop(); transporter.periodic(false, false); launcher.stop(); uptake.stop(); }
 }
+
+
+
+
 
 
 

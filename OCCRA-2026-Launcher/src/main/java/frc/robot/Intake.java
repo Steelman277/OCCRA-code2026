@@ -57,12 +57,12 @@ public final class Intake {
     if (retractPressed) motion.request(false, now);
     else if (togglePressed) motion.toggleDeployment(now);
 
-    if (outtakePressed) {motion.toggleRollers();roller.setControl(rollerRequest.withOutput(-6.0));}; //TODO make this work
-    if (rollersPressed) motion.toggleRollers();
+    // Y temporarily overrides output without toggling the saved roller state.
+    if (rollersPressed && !outtakePressed) motion.toggleRollers();
 
 
     double volts = motion.update(now, current.getValueAsDouble(), fresh);
-    double rollerVolts = motion.rollerVolts();
+    double rollerVolts = OuttakeLogic.volts(outtakePressed, isDeployed(), motion.rollerVolts(), Constants.Intake.OUTTAKE_VOLTS);
     if (!deploy.setControl(deployRequest.withOutput(volts)).isOK()
         || !roller.setControl(rollerRequest.withOutput(rollerVolts)).isOK()) {
       motion.fail("Intake motor command failed");
@@ -82,6 +82,9 @@ public final class Intake {
     SmartDashboard.putBoolean("Intake/RollersRunning", motion.rollerVolts() != 0);
   }
 }
+
+
+
 
 
 
