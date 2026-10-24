@@ -143,9 +143,10 @@ public final class Constants {
   public static final class Launcher {
     private Launcher() {}
     // Full shot voltage on right trigger; tune positive and at most 12 V.
-    public static final double RUN_VOLTS = 6.0;
+    public static final double arcMultiplier = 1.2;
+    public static final double RUN_VOLTS = 6.0 * arcMultiplier;
     // Low shot voltage on left bumper; positive and below RUN_VOLTS.
-    public static final double LOW_SHOT_VOLTS = 4.4;
+    public static final double LOW_SHOT_VOLTS = 4.4 * arcMultiplier;
     // Time before feeding; does not verify wheel speed. Restarts on shot power change.
     public static final double SPINUP_SECONDS = 0.750;
     // HARDWARE: match the unique CAN ID assigned in Phoenix Tuner; changing code does not rename the device.
