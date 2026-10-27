@@ -99,7 +99,7 @@ public final class Constants {
     public static final boolean RIGHT_INVERTED = false;
     // Commissioning settings: verify direction, speed, and detection on the robot.
     // FEED SPEED: forward voltage, not RPM. Raise gradually for throughput; lower for jams or excessive launcher speed sag.
-    public static final double RUN_VOLTS = 3.0;
+    public static final double RUN_VOLTS = 2.5;
     public static final double LAUNCH_VOLTS = 7.50;
     // MOTOR CURRENT: stator amperes limit torque/heating. Choose for the mechanism; do not raise just to conceal a jam.
     public static final double STATOR_LIMIT_AMPS = 25.0;
@@ -143,7 +143,7 @@ public final class Constants {
   public static final class Launcher {
     private Launcher() {}
     // Full shot voltage on right trigger; tune positive and at most 12 V.
-    public static final double arcMultiplier = 1.2;
+    public static final double arcMultiplier = 1.0;
     public static final double RUN_VOLTS = 6.0 * arcMultiplier;
     // Low shot voltage on left bumper; positive and below RUN_VOLTS.
     public static final double LOW_SHOT_VOLTS = 4.4 * arcMultiplier;
