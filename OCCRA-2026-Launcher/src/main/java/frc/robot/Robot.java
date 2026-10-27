@@ -45,8 +45,9 @@ public final class Robot extends TimedRobot {
   @Override public void autonomousPeriodic() { 
     intake.stop(); transporter.periodic(false, false); launcher.stop(); uptake.stop(); 
     time = time + 0.02;
-    if (time < 5.0) {drivetrain.drive(-0.3,0,0,true);}
+    if (time < 3.0) {drivetrain.drive(-0.3,0,0,true);}
     else {drivetrain.stop();}
+    if (time < 0.1) intake.periodic(true,false,false,false,false);
   }
   @Override public void teleopInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
   @Override public void teleopExit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }

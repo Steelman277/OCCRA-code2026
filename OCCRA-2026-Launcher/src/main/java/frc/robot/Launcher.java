@@ -1,7 +1,10 @@
 package frc.robot;
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.VelocityVoltage; 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -31,6 +34,8 @@ public final class Launcher {
         && Double.isFinite(Constants.Launcher.SPINUP_SECONDS) && Constants.Launcher.SPINUP_SECONDS >= 0;
     configured = a && b && settings;
     if (!settings) report("Invalid launcher voltage/delay constants");
+    right.getConfigurator().apply(new Slot0Configs().withKP(Constants.Launcher.kP).withKS(Constants.Launcher.kS).withKV(Constants.Launcher.kV));
+    left.getConfigurator().apply(new Slot0Configs().withKP(Constants.Launcher.kP).withKS(Constants.Launcher.kS).withKV(Constants.Launcher.kV));
   }
 
   private boolean configure(TalonFX motor, boolean inverted) {
@@ -55,22 +60,26 @@ public final class Launcher {
   public boolean periodic(boolean requested, boolean lowShot) {
     boolean healthy = configured && !commandFault;
     boolean ready = logic.update(requested, lowShot, healthy, Timer.getFPGATimestamp());
-    double volts = requested && healthy
-        ? (lowShot ? Constants.Launcher.LOW_SHOT_VOLTS : Constants.Launcher.RUN_VOLTS) : 0;
-    if (requested && logic.state() != LauncherLogic.State.FAULT) {
-      var a = left.setControl(leftRequest.withOutput(volts));
-      var b = right.setControl(rightRequest.withOutput(volts));
+    //double volts = requested && healthy
+       // ? (lowShot ? Constants.Launcher.LOW_SHOT_VOLTS : Constants.Launcher.RUN_VOLTS) : 0; //!if (requested and healthy) volts = 0, else if lowShot set volts to lowshotvolts, otherwise use runvolts
+    double rpm;
+       if (lowShot) {
+      rpm = Constants.Launcher.LOW_SHOT_RPM;
+    } else rpm = Constants.Launcher.HIGH_SHOT_RPM;
+       if (requested && logic.state() != LauncherLogic.State.FAULT) {
+      var a = left.setControl(new VelocityVoltage(rpm / 60.0));
+      var b = right.setControl(new VelocityVoltage(rpm / 60.0));
       if (!a.isOK() || !b.isOK()) {
-        commandFault = true; logic.fail(); ready = false; volts = 0;
+        commandFault = true; logic.fail(); ready = false; rpm = 0;
         left.stopMotor(); right.stopMotor();
         report("Launcher voltage command failed: LEFT=" + a + ", RIGHT=" + b);
       }
-    } else { left.stopMotor(); right.stopMotor(); volts = 0; }
-    SmartDashboard.putString("Launcher/ControlMode", "Raw voltage with timed feed");
+    } else { left.stopMotor(); right.stopMotor(); rpm = 0; }
+    SmartDashboard.putString("Launcher/ControlMode", "RPM (hopefully) with timed feed");
     SmartDashboard.putString("Launcher/State", logic.state().name());
     SmartDashboard.putString("Launcher/Shot", requested ? (lowShot ? "Low" : "Full") : "Off");
     SmartDashboard.putString("Launcher/Fault", faultReason);
-    SmartDashboard.putNumber("Launcher/CommandedVolts", volts);
+    SmartDashboard.putNumber("Launcher/CommandedRPM", rpm);
     SmartDashboard.putNumber("Launcher/SpinupSeconds", Constants.Launcher.SPINUP_SECONDS);
     SmartDashboard.putBoolean("Launcher/Ready", ready); // Delay elapsed, NOT verified wheel speed.
     SmartDashboard.putBoolean("Launcher/Healthy", healthy && !commandFault);
