@@ -143,7 +143,17 @@ public final class Constants {
   public static final class Launcher {
     private Launcher() {}
     // Full shot voltage on right trigger; tune positive and at most 12 V.
+<<<<<<< Updated upstream
     public static final double arcMultiplier = 1.2;
+=======
+    public static final double arcMultiplier = 1.0;
+
+    public static final double LOW_SHOT_RPM = 3000.0;
+    public static final double HIGH_SHOT_RPM = 4000.0; //TODO tune these values
+    public static final double kP = 0.1;
+    public static final double kS = 0.36;
+    public static final double kV = 0.116;
+>>>>>>> Stashed changes
     public static final double RUN_VOLTS = 6.0 * arcMultiplier;
     // Low shot voltage on left bumper; positive and below RUN_VOLTS.
     public static final double LOW_SHOT_VOLTS = 4.4 * arcMultiplier;
