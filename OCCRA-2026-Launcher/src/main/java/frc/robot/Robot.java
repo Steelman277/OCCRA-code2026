@@ -56,8 +56,8 @@ public final class Robot extends TimedRobot {
     
   else if  (time > 2 && time < 4.61) {drivetrain.drive(-0.3,0,0,true);}
   else if (time > 2 && time < 5.11) {drivetrain.drive(0,0,-.5,true);}
-  else if  (time > 2 && time < 5.83) {drivetrain.drive(-.3,0,0,true);} 
-  else if (time > 2 && time< 7) launcher.periodic(true,false);
+  else if  (time > 2 && time < 6.08) {drivetrain.drive(-.3,0,0,true);} 
+  else if (time > 2 && time< 10) launcher.periodic(true,false);
   else {drivetrain.stop();launcher.stop();transporter.stop();}
   
   if ( time > 6.25 && time < 7)  uptake.periodic(true,true,true,false); transporter.periodic(true,true);
