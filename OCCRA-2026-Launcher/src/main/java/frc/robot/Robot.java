@@ -38,16 +38,30 @@ public final class Robot extends TimedRobot {
   @Override public void disabledInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
   private final Timer autoTimer = new Timer();
   @Override public void autonomousInit() { 
+    time = 0;
     launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop();  
     autoTimer.restart();
+  intake.stop(); transporter.periodic(false, false); launcher.stop(); uptake.stop(); 
+    intake.periodic(true,false,true,false,false);
   }
+  //16.5 in ser second for .3 motorspeed. .5 motorspeed is about 90 degrees per second
     double time;
   @Override public void autonomousPeriodic() { 
-    intake.stop(); transporter.periodic(false, false); launcher.stop(); uptake.stop(); 
+   
+    
     time = time + 0.02;
-    if (time < 3.0) {drivetrain.drive(-0.3,0,0,true);}
-    else {drivetrain.stop();}
-    if (time < 0.1) intake.periodic(true,false,false,false,false);
+    if (1.9 < time && time < 2) /*intake.periodic(false,false,false,false,false)*/ intake.stop();
+  
+    
+    
+  else if  (time > 2 && time < 4.61) {drivetrain.drive(-0.3,0,0,true);}
+  else if (time > 2 && time < 5.11) {drivetrain.drive(0,0,-.5,true);}
+  else if  (time > 2 && time < 5.83) {drivetrain.drive(-.3,0,0,true);} 
+  else if (time > 2 && time< 7) launcher.periodic(true,false);
+  else {drivetrain.stop();launcher.stop();transporter.stop();}
+  
+  if ( time > 6.25 && time < 7)  uptake.periodic(true,true,true,false); transporter.periodic(true,true);
+   
   }
   @Override public void teleopInit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
   @Override public void teleopExit() { launcher.stop(); uptake.stop(); transporter.stop(); drivetrain.stop(); intake.stop(); }
