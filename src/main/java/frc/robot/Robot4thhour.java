@@ -163,23 +163,29 @@ public class Robot4thhour extends TimedRobot {
        }
   @Override
   public void teleopPeriodic() {
+   
+   // this part here below is the movement on the robot 
     double forwardSpeed = -driverController.getLeftY();
     double strafeSpeed = driverController.getLeftX();
     double rotationSpeed = driverController.getRightX();
+    // this here is the launcher speed set. the setup is if the trigger > .01 then set the inatke motor speed to what max speed times the trigger for speed control
     drive.driveCartesian(forwardSpeed, strafeSpeed, rotationSpeed);
     if (driverController.getRightTriggerAxis() > 0.1) {
       launcher.set(launcherspeed * driverController.getRightTriggerAxis());
       launcher2.set(launcherspeed * driverController.getRightTriggerAxis());
+    //the right bumpers do the same as the triggers but in reverse adn the A button does the same. 
     }else if (driverController.getRightBumperButton()){
       launcher.set(-launcherspeed);
       launcher2.set(-launcherspeed);
     }else if (driverController.getAButton()){
       launcher.set(-launcherspeed2);
       launcher2.set(-launcherspeed2);
+    // if nothing is pressed it sets the speeds to nothing so it doesnt activate the motors
     }else {
       launcher.set(0);
       launcher2.set(0);
     }
+    // this is the intake control and it sets the speed multliplied by the ammount in the trigger (ie. intake max speed * .01-1)
     if (driverController.getLeftTriggerAxis() > 0.1) {
       intakeLeft.set(intakeSpeed * driverController.getLeftTriggerAxis());
       intakeRight.set(intakeSpeed * driverController.getLeftTriggerAxis());
